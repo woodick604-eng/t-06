@@ -61,7 +61,7 @@ const App: React.FC = () => {
         model: 'gemini-3-flash-preview',
         contents: [{ parts: [
           { inlineData: { mimeType: 'audio/webm', data: base64Audio } },
-          { text: "Actua com un redactor professional dels Mossos d'Esquadra. Transcriu aquest dictat: corregeix la gramàtica i redacta-ho en llenguatge policial formal. SI l'agent aporta dades noves, transcriu-les netes. NO incloguis matrícules ni noms. Elimina qualsevol asterisc o símbol de format." }
+          { text: "Transcriu aquest dictat policial. Corregeix gramàtica i manté registre formal. NO inventis matrícules ni noms. Elimina asteriscs i qualsevol format markdown. El resultat ha de ser text net per ser integrat en un informe NAT." }
         ]}],
         config: { temperature: 0.1 }
       });
@@ -119,13 +119,17 @@ const App: React.FC = () => {
   };
 
   const sendEmail = () => {
-    const natMatch = report.match(/NAT\s*(\d+)/i);
+    // Busquem el format NAT XXXX/AA o NAT XXXX
+    const natMatch = report.match(/NAT\s*(\d+(\/\d+)?)/i);
     const nat = natMatch ? natMatch[1] : 'SENSE_NAT';
     const yearShort = new Date().getFullYear().toString().slice(-2);
     
+    // Si el NAT no porta l'any, li afegim per l'assumpte
+    const fullNat = nat.includes('/') ? nat : `${nat}/${yearShort}`;
+    
     const recipients = "aadsuar@mossos.cat,itpg7255@mossos.cat";
-    // Nou format d'assumpte: Valoració de l'agent actuant del NAT XXXX/AA ART MN
-    const subject = `Valoració de l'agent actuant del NAT ${nat}/${yearShort} ART MN`;
+    // Assumpte: Valoració de l'agent actuant del NAT XXXX/AA ART MN
+    const subject = `Valoració de l'agent actuant del NAT ${fullNat} ART MN`;
     
     const cleanReport = report.replace(/\*/g, '');
     const cleanInput = inputText.replace(/\*/g, '');
@@ -159,7 +163,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-8 space-y-12 pb-40">
         
-        {/* ENTRADA DE DADES AMB FEEDBACK DE GRAVACIÓ */}
+        {/* ENTRADA DE RELAT AMB FEEDBACK DE GRAVACIÓ I TRANSCRIPCIÓ */}
         <section className={`space-y-4 transition-all duration-500 ${isRecording ? 'scale-[1.01]' : ''}`}>
           <div className="flex items-center space-x-2 border-l-4 border-slate-700 pl-3">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
@@ -168,32 +172,32 @@ const App: React.FC = () => {
             {isRecording && <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>}
           </div>
           
-          <div className={`relative bg-slate-900/30 rounded-2xl border transition-all duration-300 ${isRecording ? 'border-red-900/50 shadow-[0_0_30px_rgba(227,6,19,0.15)]' : 'border-slate-800 focus-within:border-slate-600'}`}>
+          <div className={`relative bg-slate-900/30 rounded-2xl border transition-all duration-300 ${isRecording ? 'border-red-900/50 shadow-[0_0_30px_rgba(227,6,19,0.2)]' : 'border-slate-800 focus-within:border-slate-600'}`}>
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               className="auto-expand w-full p-6 md:p-10 text-[16px] leading-relaxed font-['Arial'] bg-transparent outline-none placeholder-slate-800"
-              placeholder="Dicta o escriu aquí el relat dels fets..."
+              placeholder="Dicta o escriu el relat de l'accident..."
               disabled={isProcessingAudio || status === AppStatus.GENERATING}
             />
             {isProcessingAudio && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl backdrop-blur-sm z-30">
                 <div className="flex flex-col items-center">
                   <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin mb-2"></div>
-                  <span className="text-[9px] font-black tracking-widest animate-pulse">TRANSCRIBINT...</span>
+                  <span className="text-[9px] font-black tracking-widest animate-pulse">NETEJANT TEXT...</span>
                 </div>
               </div>
             )}
           </div>
         </section>
 
-        {/* INFORME T-06 AMB FEEDBACK DE GENERACIÓ/ACTUALITZACIÓ */}
+        {/* INFORME NAT GENERAT AMB FEEDBACK D'ACTUALITZACIÓ */}
         {report && (
           <section id="report-section" className="space-y-6 pt-10 border-t-2 border-slate-800 animate-in fade-in slide-in-from-bottom-10 duration-1000">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3 border-l-4 border-[#E30613] pl-3">
-                <span className="text-lg md:text-2xl font-black uppercase tracking-widest text-[#E30613]">Probable evolució T-06</span>
+                <span className="text-lg md:text-2xl font-black uppercase tracking-widest text-[#E30613]">Evolució T-06</span>
               </div>
               <button 
                 onClick={() => { navigator.clipboard.writeText(report); alert('Copiat!'); }}
@@ -211,15 +215,15 @@ const App: React.FC = () => {
                 ref={outputRef}
                 value={report}
                 onChange={(e) => setReport(e.target.value)}
-                className={`auto-expand w-full p-8 md:p-14 text-[16px] leading-relaxed font-['Arial'] font-semibold bg-[#0c1220] outline-none text-slate-100 transition-opacity duration-300 ${status === AppStatus.GENERATING ? 'opacity-40' : 'opacity-100'}`}
+                className={`auto-expand w-full p-8 md:p-14 text-[16px] leading-relaxed font-['Arial'] font-semibold bg-[#0c1220] outline-none text-slate-100 transition-opacity duration-300 ${status === AppStatus.GENERATING ? 'opacity-30' : 'opacity-100'}`}
                 spellCheck={false}
               />
 
               {status === AppStatus.GENERATING && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="flex flex-col items-center">
-                    <div className="w-10 h-10 border-4 border-[#E30613]/20 border-t-[#E30613] rounded-full animate-spin mb-3"></div>
-                    <span className="text-[10px] font-black tracking-[0.4em] text-[#E30613]">ACTUALITZANT NAT...</span>
+                    <div className="w-12 h-12 border-4 border-[#E30613]/20 border-t-[#E30613] rounded-full animate-spin mb-3"></div>
+                    <span className="text-[10px] font-black tracking-[0.4em] text-[#E30613] animate-pulse">SISTEMA INTEGRANT DADES...</span>
                   </div>
                 </div>
               )}
@@ -230,7 +234,7 @@ const App: React.FC = () => {
                   className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition-all flex items-center space-x-3 border border-white/10 active:scale-95 hover:scale-105"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" /></svg>
-                  <span>Enviar per Email</span>
+                  <span>Enviar Correu T-06</span>
                 </button>
               </div>
             </div>
@@ -248,7 +252,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* BOTONS FLOTANTS AMB ESTATS D'ANIMACIÓ */}
+      {/* BOTONS FLOTANTS AMB ESTATS D'ANIMACIÓ I FEEDBACK */}
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end space-y-4">
         {inputText.length > 5 && (
           <button 
@@ -286,7 +290,7 @@ const App: React.FC = () => {
       </div>
 
       <footer className="p-4 bg-black/40 text-[8px] font-black text-slate-700 text-center tracking-[0.5em] uppercase border-t border-white/5">
-        PG-ME • ÀREA DE TRÀNSIT • COST ACUMULAT: {totalCost.toFixed(4)}€
+        PG-ME • ÀREA DE TRÀNSIT • UNITAT T-06 • COST ACUMULAT: {totalCost.toFixed(4)}€
       </footer>
     </div>
   );
