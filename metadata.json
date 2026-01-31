@@ -1,0 +1,7 @@
+{
+  "name": "ACCIDENTS EVOLUCIO T-06",
+  "description": "Aplicació de redacció d'informes d'accidents de trànsit per als Mossos d'Esquadra amb dictat per veu en català i assistència d'IA.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
