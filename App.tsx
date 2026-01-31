@@ -243,7 +243,7 @@ const App: React.FC = () => {
                   className="hidden lg:flex bg-slate-800/50 hover:bg-slate-700 text-white/50 px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all items-center space-x-2 border border-white/5 active:scale-95"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  <span>Fotos (Escriptori)</span>
+                  <span>Anàlisi Fotos (T06)</span>
                 </button>
                 <button 
                   onClick={sendEmail}
