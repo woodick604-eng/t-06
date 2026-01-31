@@ -124,10 +124,13 @@ const App: React.FC = () => {
     const yearShort = new Date().getFullYear().toString().slice(-2);
     const fullNatForSubject = nat.includes('/') ? nat : `${nat}/${yearShort}`;
     
-    const recipients = "aadsuar@mossos.cat,itpg7255@mossos.cat";
+    const recipients = "aadsuar@mossos.cat,itpg7255@mossos.cat,itpg31459@mossos.cat";
     const subject = `Valoració de l'agent actuant del NAT ${fullNatForSubject} ART MN`;
     
-    const cleanReport = report.replace(/\*/g, '');
+    let cleanReport = report;
+    // Bolding specific section title in email body
+    cleanReport = cleanReport.replace(/(DADES PENDENTS DE COMPLETAR:)/gi, '**$1**');
+    
     const cleanInput = inputText.replace(/\*/g, '');
     
     const fullBody = `**PROBABLE EVOLUCIO T-06**\n\n${cleanReport}\n\n\n\n--------------------------------------------------\n\n**RELAT DE L'AGENT PER SEGURETAT**\n\n${cleanInput}`;
@@ -153,17 +156,17 @@ const App: React.FC = () => {
             <p className="text-[8px] uppercase tracking-tighter text-white/40">SISTEMA DE REDACCIÓ CONTINUA</p>
           </div>
         </div>
-        <div className="flex flex-col items-end space-y-1">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
+          <div className="flex flex-col items-end">
             <span className="text-[10px] font-bold text-white/70 tracking-widest">@5085</span>
-            <button 
-              onClick={handleReset} 
-              className="text-[9px] font-black text-white/50 hover:text-white hover:border-white/40 uppercase tracking-widest border border-white/10 px-3 py-1 rounded transition-colors active:scale-90"
-            >
-              Reset
-            </button>
+            <span className="text-[8px] font-mono text-white/30 tracking-widest">{totalCost.toFixed(4)}€</span>
           </div>
-          <span className="text-[8px] font-mono text-white/30 tracking-widest">{totalCost.toFixed(4)}€</span>
+          <button 
+            onClick={handleReset} 
+            className="text-[9px] font-black text-white/50 hover:text-white hover:border-white/40 uppercase tracking-widest border border-white/10 px-3 py-1 rounded transition-colors active:scale-90"
+          >
+            Reset
+          </button>
         </div>
       </header>
 
@@ -237,7 +240,7 @@ const App: React.FC = () => {
               <div className="p-4 md:p-6 bg-black/20 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
                 <button 
                   onClick={openImageProcessor}
-                  className="hidden lg:flex bg-slate-800 hover:bg-slate-700 text-white/70 px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl transition-all items-center space-x-2 border border-white/5 active:scale-95"
+                  className="hidden lg:flex bg-slate-800/50 hover:bg-slate-700 text-white/50 px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all items-center space-x-2 border border-white/5 active:scale-95"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   <span>Fotos (Escriptori)</span>
