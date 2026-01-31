@@ -61,7 +61,7 @@ const App: React.FC = () => {
         model: 'gemini-3-flash-preview',
         contents: [{ parts: [
           { inlineData: { mimeType: 'audio/webm', data: base64Audio } },
-          { text: "Transcriu aquest dictat policial. Corregeix gramàtica i manté registre formal. NO inventis matrícules ni noms. Elimina asteriscs i qualsevol format markdown. El resultat ha de ser text net per ser integrat en un informe NAT." }
+          { text: "Transcriu aquest dictat policial. Corregeix gramàtica i manté registre formal. NO inventis dades, matrícules ni noms. Elimina asteriscs i qualsevol format markdown. El resultat ha de ser text net." }
         ]}],
         config: { temperature: 0.1 }
       });
@@ -119,25 +119,25 @@ const App: React.FC = () => {
   };
 
   const sendEmail = () => {
-    // Busquem el format NAT XXXX/AA o NAT XXXX
     const natMatch = report.match(/NAT\s*(\d+(\/\d+)?)/i);
     const nat = natMatch ? natMatch[1] : 'SENSE_NAT';
     const yearShort = new Date().getFullYear().toString().slice(-2);
-    
-    // Si el NAT no porta l'any, li afegim per l'assumpte
-    const fullNat = nat.includes('/') ? nat : `${nat}/${yearShort}`;
+    const fullNatForSubject = nat.includes('/') ? nat : `${nat}/${yearShort}`;
     
     const recipients = "aadsuar@mossos.cat,itpg7255@mossos.cat";
-    // Assumpte: Valoració de l'agent actuant del NAT XXXX/AA ART MN
-    const subject = `Valoració de l'agent actuant del NAT ${fullNat} ART MN`;
+    const subject = `Valoració de l'agent actuant del NAT ${fullNatForSubject} ART MN`;
     
     const cleanReport = report.replace(/\*/g, '');
     const cleanInput = inputText.replace(/\*/g, '');
     
-    const fullBody = `PROBABLE EVOLUCIO T-06\n\n${cleanReport}\n\n\n\n\n\n--------------------------------------------------\n\nRELAT DE L'AGENT PER SEGURETAT\n\n${cleanInput}`;
+    const fullBody = `**PROBABLE EVOLUCIO T-06**\n\n${cleanReport}\n\n\n\n--------------------------------------------------\n\n**RELAT DE L'AGENT PER SEGURETAT**\n\n${cleanInput}`;
     
     const mailtoUrl = `mailto:${recipients}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
     window.location.href = mailtoUrl;
+  };
+
+  const openImageProcessor = () => {
+    window.open('https://processador-d-imatges-d-informes-d-accidents-per-61923779161.us-west1.run.app/', '_blank');
   };
 
   const isModified = report !== '' && inputText !== lastProcessedInput;
@@ -153,17 +153,23 @@ const App: React.FC = () => {
             <p className="text-[8px] uppercase tracking-tighter text-white/40">SISTEMA DE REDACCIÓ CONTINUA</p>
           </div>
         </div>
-        <button 
-          onClick={handleReset} 
-          className="text-[9px] font-black text-white/50 hover:text-white hover:border-white/40 uppercase tracking-widest border border-white/10 px-3 py-1 rounded transition-colors active:scale-90"
-        >
-          Reset
-        </button>
+        <div className="flex flex-col items-end space-y-1">
+          <div className="flex items-center space-x-4">
+            <span className="text-[10px] font-bold text-white/70 tracking-widest">@5085</span>
+            <button 
+              onClick={handleReset} 
+              className="text-[9px] font-black text-white/50 hover:text-white hover:border-white/40 uppercase tracking-widest border border-white/10 px-3 py-1 rounded transition-colors active:scale-90"
+            >
+              Reset
+            </button>
+          </div>
+          <span className="text-[8px] font-mono text-white/30 tracking-widest">{totalCost.toFixed(4)}€</span>
+        </div>
       </header>
 
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-8 space-y-12 pb-40">
         
-        {/* ENTRADA DE RELAT AMB FEEDBACK DE GRAVACIÓ I TRANSCRIPCIÓ */}
+        {/* ENTRADA DE RELAT */}
         <section className={`space-y-4 transition-all duration-500 ${isRecording ? 'scale-[1.01]' : ''}`}>
           <div className="flex items-center space-x-2 border-l-4 border-slate-700 pl-3">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
@@ -192,7 +198,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* INFORME NAT GENERAT AMB FEEDBACK D'ACTUALITZACIÓ */}
+        {/* INFORME T-06 */}
         {report && (
           <section id="report-section" className="space-y-6 pt-10 border-t-2 border-slate-800 animate-in fade-in slide-in-from-bottom-10 duration-1000">
             <div className="flex justify-between items-center">
@@ -215,7 +221,7 @@ const App: React.FC = () => {
                 ref={outputRef}
                 value={report}
                 onChange={(e) => setReport(e.target.value)}
-                className={`auto-expand w-full p-8 md:p-14 text-[16px] leading-relaxed font-['Arial'] font-semibold bg-[#0c1220] outline-none text-slate-100 transition-opacity duration-300 ${status === AppStatus.GENERATING ? 'opacity-30' : 'opacity-100'}`}
+                className={`auto-expand w-full p-8 md:p-14 text-[16px] font-semibold leading-relaxed font-['Arial'] bg-[#0c1220] outline-none text-slate-100 transition-opacity duration-300 ${status === AppStatus.GENERATING ? 'opacity-30' : 'opacity-100'}`}
                 spellCheck={false}
               />
 
@@ -223,15 +229,22 @@ const App: React.FC = () => {
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 border-4 border-[#E30613]/20 border-t-[#E30613] rounded-full animate-spin mb-3"></div>
-                    <span className="text-[10px] font-black tracking-[0.4em] text-[#E30613] animate-pulse">SISTEMA INTEGRANT DADES...</span>
+                    <span className="text-[10px] font-black tracking-[0.4em] text-[#E30613] animate-pulse">INTEGRANT DADES...</span>
                   </div>
                 </div>
               )}
               
-              <div className="p-6 md:p-8 bg-black/20 border-t border-white/5 flex justify-center md:justify-end">
+              <div className="p-4 md:p-6 bg-black/20 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <button 
+                  onClick={openImageProcessor}
+                  className="hidden lg:flex bg-slate-800 hover:bg-slate-700 text-white/70 px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl transition-all items-center space-x-2 border border-white/5 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span>Fotos (Escriptori)</span>
+                </button>
                 <button 
                   onClick={sendEmail}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition-all flex items-center space-x-3 border border-white/10 active:scale-95 hover:scale-105"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition-all flex items-center justify-center space-x-3 border border-white/10 active:scale-95 hover:scale-105 w-full md:w-auto"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" /></svg>
                   <span>Enviar Correu T-06</span>
@@ -247,12 +260,11 @@ const App: React.FC = () => {
               <div className="w-16 h-16 border-4 border-slate-800 border-t-[#E30613] rounded-full animate-spin mb-6"></div>
               <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-b-[#002D56] rounded-full animate-spin-slow"></div>
             </div>
-            <p className="text-[9px] font-black tracking-[0.5em] text-white/50 animate-pulse uppercase">IA GENERANT NOU NAT...</p>
+            <p className="text-[9px] font-black tracking-[0.5em] text-white/50 animate-pulse uppercase">IA GENERANT INFORME...</p>
           </div>
         )}
       </main>
 
-      {/* BOTONS FLOTANTS AMB ESTATS D'ANIMACIÓ I FEEDBACK */}
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end space-y-4">
         {inputText.length > 5 && (
           <button 

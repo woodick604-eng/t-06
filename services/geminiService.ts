@@ -19,7 +19,7 @@ export class GeminiService {
   async generateReport(userInput: string): Promise<{ text: string; usage?: UsageStats }> {
     try {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: userInput,
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
